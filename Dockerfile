@@ -1,65 +1,42 @@
-# ── Stage 1: Extract LS binary from Antigravity .deb (amd64 only) ──
+ARG ZG_IMAGE=ghcr.io/nikketryhard/zerogravity:latest
+
+# ── Stage 1: Extract LS binary from Antigravity tarball ──
 FROM debian:trixie-slim AS ls-extractor
-
-ARG TARGETARCH
-
-# Add Google's Antigravity apt repo (only needed for amd64)
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
-    apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl gnupg \
-    && curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-    | gpg --dearmor -o /etc/apt/keyrings/antigravity-repo-key.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main" \
-    > /etc/apt/sources.list.d/antigravity.list \
-    && apt-get update \
-    && rm -rf /var/lib/apt/lists/*; \
-    fi
-
-# Download .deb and extract only the LS binary (no full install)
-# Pin to known-good version to prevent breakage from Google updates
-WORKDIR /extract
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
-    apt-get update \
-    && apt-get download antigravity=1.16.5-1770081357 \
-    && dpkg-deb -x antigravity_*.deb extracted/ \
-    && cp extracted/usr/share/antigravity/resources/app/extensions/antigravity/bin/language_server_linux_x64 /ls_binary \
-    && chmod +x /ls_binary \
-    && rm -rf /extract; \
-    else \
-    touch /ls_binary; \
-    fi
-
-# ── Stage 2: Download prebuilt proxy binary (arch-aware) ──
-FROM debian:trixie-slim AS downloader
-
-ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-ARG GH_RELEASE_URL=https://github.com/NikkeTryHard/zerogravity/releases/latest/download
+# Download from Google's CDN — auto-detect architecture
+# Pin to known-good version to prevent breakage from Google updates
+ARG AG_VERSION=1.16.5-6703236727046144
+WORKDIR /extract
+RUN ARCH=$(dpkg --print-architecture) \
+    && case "$ARCH" in \
+    amd64) CDN_ARCH="linux-x64";  LS_NAME="language_server_linux_x64" ;; \
+    arm64) CDN_ARCH="linux-arm";   LS_NAME="language_server_linux_arm" ;; \
+    *)     echo "Unsupported arch: $ARCH" && exit 1 ;; \
+    esac \
+    && curl -fsSL "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/${AG_VERSION}/${CDN_ARCH}/Antigravity.tar.gz" \
+    | tar xz --strip-components=1 \
+    && cp "resources/app/extensions/antigravity/bin/${LS_NAME}" /ls_binary \
+    && chmod +x /ls_binary \
+    && rm -rf /extract
 
-# Map Docker TARGETARCH to our release naming convention
-RUN ARCH_SUFFIX=$(case "$TARGETARCH" in \
-    amd64) echo "x86_64" ;; \
-    arm64) echo "arm64" ;; \
-    *) echo "x86_64" ;; \
-    esac) \
-    && curl -fsSL "$GH_RELEASE_URL/zerogravity-linux-${ARCH_SUFFIX}" -o /zerogravity \
-    && curl -fsSL "$GH_RELEASE_URL/zg-linux-${ARCH_SUFFIX}" -o /zg \
-    && chmod +x /zerogravity /zg
+# ── Stage 2: Extract proxy binary from official Docker image ──
+# GitHub Release binaries segfault on arm64 (obfuscation issue?), so we
+# extract from the working official Docker image instead.
+FROM ${ZG_IMAGE} AS downloader
 
 # ── Stage 3: Runtime ──
 FROM debian:trixie-slim
-
-ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     gcc \
     libc6-dev \
+    iptables \
     sudo \
     procps \
     sqlite3 \
@@ -71,12 +48,8 @@ RUN useradd --system --no-create-home --shell /usr/sbin/nologin zerogravity-ls \
     && chmod 0440 /etc/sudoers.d/zerogravity
 
 # Copy binaries
-COPY --from=downloader /zerogravity /usr/local/bin/zerogravity
-COPY --from=downloader /zg /usr/local/bin/zg
-
-# Copy LS binary — on amd64 this is the real binary from Google's .deb,
-# on arm64 this is a placeholder (Google doesn't publish ARM LS binaries).
-# ARM users must mount their own LS binary and set ZEROGRAVITY_LS_PATH.
+COPY --from=downloader /usr/local/bin/zerogravity /usr/local/bin/zerogravity
+COPY --from=downloader /usr/local/bin/zg /usr/local/bin/zg
 COPY --from=ls-extractor /ls_binary /usr/local/bin/language_server_linux_x64
 
 # Setup directories
@@ -88,7 +61,6 @@ EXPOSE 8741 8742
 
 ENV RUST_LOG=info
 ENV ZEROGRAVITY_TOKEN=""
-ENV ZEROGRAVITY_UPSTREAM_PROXY=""
 ENV ZEROGRAVITY_LS_PATH="/usr/local/bin/language_server_linux_x64"
 
 ENTRYPOINT ["zerogravity"]

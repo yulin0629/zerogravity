@@ -16,4 +16,6 @@ Thumbs.db
 *.pem
 zerogravity/
 .ace-tool/
+.serena/
 AgentLogs/
+session-*.md

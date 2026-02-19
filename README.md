@@ -1,3 +1,13 @@
+> [!IMPORTANT]
+> **Source code has moved to a private repository** for long-term sustainability.
+> Binaries, Docker images, and releases will continue to be published here.
+>
+> **Want access to the source?**
+> - 📬 [Open a Discussion](https://github.com/NikkeTryHard/zerogravity/discussions) on this repo
+> - 💬 [Join our Telegram](https://t.me/ZeroGravityProxy) and DM me
+>
+> Read-only access is granted on request.
+
 <p align="center">
   <img src="https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-555?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-333?style=flat-square" alt="License" />

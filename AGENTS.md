@@ -106,6 +106,12 @@ Three stages:
 
 Do NOT `docker run ghcr.io/nikketryhard/zerogravity:latest` directly — its LS binary is a 0-byte placeholder. Always `docker compose build` locally.
 
+## Running Modes
+
+- `--headless` (default in Docker): Standalone LS binary, no Antigravity app needed
+- `--classic`: Attaches to a running Antigravity instance
+- `--no-mitm`: Proxy only, no MITM interception
+
 ## Native Setup (non-Docker)
 
 ```bash

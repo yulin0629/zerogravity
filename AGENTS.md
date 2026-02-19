@@ -41,14 +41,9 @@ Source code is not in this repo. The development workflow for this repo focuses 
 # Build image (multi-stage: extracts LS binary from Antigravity tarball + proxy from official image)
 docker compose build
 
-# Run with token
-ZEROGRAVITY_TOKEN=ya29.xxx docker compose up -d
+# Start container (token injected separately — see Token Management)
+docker compose up -d
 
-# Quick run without compose
-docker run -d --name zerogravity \
-  -p 8741:8741 -p 8742:8742 \
-  -e ZEROGRAVITY_TOKEN=ya29.xxx \
-  ghcr.io/nikketryhard/zerogravity:latest
 # NOTE: official image has 0-byte LS binary — build locally with `docker compose build` instead
 ```
 
@@ -107,15 +102,28 @@ When working with the Rust source (in the private repo), these configs apply:
 - **`.cargo/config.toml`**: Uses `sccache` as rustc wrapper, `mold` linker via `clang` on Linux x86_64, 8 parallel jobs
 - **`.config/nextest.toml`**: Test runner uses `cargo-nextest`, 8 threads, 30s slow timeout, no retries
 
+## Token Management
+
+Token sources (checked in order): `ZEROGRAVITY_TOKEN` env var, `~/.config/zerogravity/token` file, runtime `POST /v1/token`.
+
+**Docker on macOS**: `state.vscdb` contains the access token but NOT the refresh token (stored in macOS Keychain via Electron safeStorage, inaccessible from Docker). The token freezes at container start and expires after ~1 hour. Solution: inject fresh tokens at runtime via `POST /v1/token`. The `docker-compose.yml` intentionally omits `ZEROGRAVITY_TOKEN` to avoid stale env vars.
+
+```bash
+# Extract token from Antigravity's state.vscdb and inject into running proxy
+TOKEN=$(sqlite3 "$HOME/Library/Application Support/Antigravity/User/globalStorage/state.vscdb" \
+  "SELECT json_extract(value, '$.apiKey') FROM ItemTable WHERE key = 'antigravityAuthStatus';")
+curl -X POST http://localhost:8741/v1/token -H "Content-Type: application/json" -d "{\"token\":\"$TOKEN\"}"
+```
+
+When the token expires: open Antigravity app briefly (refreshes `state.vscdb`), then re-run the above.
+
 ## Environment Variables
 
 | Variable | Purpose |
 |----------|---------|
-| `ZEROGRAVITY_TOKEN` | OAuth token (`ya29.xxx`) for authentication |
+| `ZEROGRAVITY_TOKEN` | OAuth token (`ya29.xxx`) — avoid in docker-compose, use `POST /v1/token` instead |
 | `ZEROGRAVITY_LS_PATH` | Custom path to the LS binary |
 | `RUST_LOG` | Log level (default: `info` in Docker) |
-
-Token sources (checked in order): env var, `~/.config/zerogravity/token` file, runtime `POST /v1/token`. If Antigravity is installed on the same machine, auto-refresh works via `state.vscdb` refresh token.
 
 ## Models
 
@@ -137,7 +145,7 @@ Token sources (checked in order): env var, `~/.config/zerogravity/token` file, r
 
 ## Gotchas
 
-- OAuth tokens expire after ~1 hour unless auto-refresh is available via `state.vscdb`
+- OAuth tokens expire after ~1 hour. On macOS Docker, there is no auto-refresh — use `POST /v1/token` to inject fresh tokens (see Token Management)
 - Tool calls are unstable and may hang
 - Both `setup-macos.sh` and `setup-windows.ps1` currently download Linux binaries (bug: should download platform-specific binaries)
 - Antigravity pins are important: Dockerfile pins `AG_VERSION=1.16.5-6703236727046144`, Linux setup pins `ANTIGRAVITY_VERSION=1.16.5-1770081357`. Updating these may break compatibility if Google changes the LS protocol.

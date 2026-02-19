@@ -13,5 +13,7 @@ services:
       # Linux: ~/.config/Antigravity
       - ${HOME}/Library/Application Support/Antigravity:/root/.config/Antigravity:ro
     environment:
-      - ZEROGRAVITY_TOKEN=${ZEROGRAVITY_TOKEN:-}
+      # Don't set ZEROGRAVITY_TOKEN here — it freezes at container start.
+      # The proxy reads state.vscdb from the mounted volume instead.
+      # Use `zg-token` to inject a fresh token at runtime via POST /v1/token.
       - RUST_LOG=info

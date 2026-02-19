@@ -20,12 +20,14 @@ The official pre-built Docker image (`ghcr.io/nikketryhard/zerogravity:latest`) 
 ## Quick Start (macOS arm64)
 
 ```bash
-# 1. Extract token from Antigravity
+# 1. Build & run
+docker compose up -d --build
+
+# 2. Inject token from Antigravity's state.vscdb
 TOKEN=$(sqlite3 "$HOME/Library/Application Support/Antigravity/User/globalStorage/state.vscdb" \
   "SELECT json_extract(value, '$.apiKey') FROM ItemTable WHERE key = 'antigravityAuthStatus';")
-
-# 2. Build & run (uses custom Dockerfile with trixie-slim base)
-ZEROGRAVITY_TOKEN="$TOKEN" docker compose up -d --build
+curl -X POST http://localhost:8741/v1/token \
+  -H "Content-Type: application/json" -d "{\"token\":\"$TOKEN\"}"
 
 # 3. Test
 curl -s http://localhost:8741/health
@@ -44,18 +46,25 @@ curl -s http://localhost:8741/v1/chat/completions \
 
 The actual LS binary filename on macOS is `language_server_macos_arm`, not `language_server_darwin_arm64` as stated in some documentation and in the Rust source code (`platform.rs:112-118`).
 
-## Token Extraction from state.vscdb
+## Token Management
+
+`state.vscdb` contains only the access token (`apiKey`), NOT the refresh token. The refresh token is stored in macOS Keychain (Electron safeStorage), which Docker cannot access. This means:
+
+- Access tokens expire after ~1 hour
+- No auto-refresh inside the Docker container
+- Tokens must be injected at runtime via `POST /v1/token`
 
 ```bash
+# Extract and inject token
 TOKEN=$(sqlite3 "$HOME/Library/Application Support/Antigravity/User/globalStorage/state.vscdb" \
   "SELECT json_extract(value, '$.apiKey') FROM ItemTable WHERE key = 'antigravityAuthStatus';")
-
-echo "$TOKEN"  # Should start with ya29.
+curl -X POST http://localhost:8741/v1/token \
+  -H "Content-Type: application/json" -d "{\"token\":\"$TOKEN\"}"
 ```
 
-- The key in ItemTable is `antigravityAuthStatus`
-- The JSON value has an `apiKey` field containing the `ya29.xxx` access token
-- Tokens expire after ~1 hour; re-inject with `curl -X POST http://localhost:8741/v1/token -H "Content-Type: application/json" -d "{\"token\":\"$TOKEN\"}"`
+**When the token expires**: open Antigravity app briefly (it refreshes `state.vscdb`), then re-run the extract+inject command above.
+
+**Why `docker-compose.yml` omits `ZEROGRAVITY_TOKEN`**: env vars freeze at container start. A token passed via env becomes stale after ~1 hour with no way to update it without restarting the container. Runtime injection via `POST /v1/token` avoids this.
 
 ## Dockerfile Design
 

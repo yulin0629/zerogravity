@@ -21,14 +21,14 @@ curl -fsSL https://github.com/NikkeTryHard/zerogravity/releases/latest/download/
 # 2. Extract refresh token from Antigravity -> accounts.json
 zg extract
 
-# 3. Start proxy (docker-compose.yml is already in the repo)
-docker compose up -d
+# 3. Start proxy
+zg-start
 curl http://localhost:8741/health  # Verify
 ```
 
 **Subsequent starts:**
 ```bash
-docker compose up -d
+zg-start
 ```
 
 ## Connecting Clients

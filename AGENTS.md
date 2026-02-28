@@ -20,11 +20,11 @@ ZeroGravity is a local MITM proxy that makes AI tool requests look like real Ant
 curl -fsSL https://github.com/NikkeTryHard/zerogravity/releases/latest/download/zg-macos-arm64 \
   -o ~/.local/bin/zg && chmod +x ~/.local/bin/zg
 
-# 2. Extract refresh token from Antigravity -> accounts.json
+# 2. Extract refresh token from Antigravity -> system config dir
 zg extract
 
-# 3. Generate docker-compose.yml
-cd ~/github/zerogravity && zg docker-init
+# 3. Clone repo (docker-compose.yml mounts accounts.json from system config dir)
+git clone https://github.com/yulin0629/zerogravity.git ~/github/zerogravity
 
 # 4. Start proxy
 zg-start

@@ -18,7 +18,5 @@ zerogravity/
 .ace-tool/
 AgentLogs/
 accounts.json
-docker-compose.yml
 docs/plans/
 *-memory.txt
-aliases.json

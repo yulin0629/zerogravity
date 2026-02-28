@@ -1,0 +1,24 @@
+services:
+  zerogravity:
+    container_name: zerogravity
+    image: ghcr.io/nikketryhard/zerogravity:latest
+    restart: unless-stopped
+    ports:
+      - "8741:8741"
+      - "443:443"
+    volumes:
+      # Mount accounts.json for multi-account rotation
+      - ./accounts.json:/root/.config/zerogravity/accounts.json:ro
+      # Mount aliases.json for custom model aliases
+      - ./aliases.json:/root/.config/zerogravity/aliases.json
+    environment:
+      # Option 1: accounts.json (mounted above) — recommended
+      # Option 2: inline accounts via env var (comma-separated email:refresh_token)
+      # - ZEROGRAVITY_ACCOUNTS=user1@gmail.com:1//token1,user2@gmail.com:1//token2
+      # Option 3: single access token (expires in 60min, not recommended)
+      # - ZEROGRAVITY_TOKEN=ya29.xxx
+      - ZEROGRAVITY_API_KEY=${ZEROGRAVITY_API_KEY:-}
+      - ZEROGRAVITY_OS=${ZEROGRAVITY_OS:-}
+      - ZEROGRAVITY_IDE_VERSION=${ZEROGRAVITY_IDE_VERSION:-}
+      - ZEROGRAVITY_DEVICE_FINGERPRINT=${ZEROGRAVITY_DEVICE_FINGERPRINT:-}
+      - RUST_LOG=info

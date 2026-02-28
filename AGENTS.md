@@ -12,6 +12,8 @@ ZeroGravity is a local MITM proxy that makes AI tool requests look like real Ant
 
 ## Setup (Docker)
 
+> macOS 上 `zg start` 不可用（沒有 native binary），必須用 `docker compose` 或 shell functions（`zg-start`）。
+
 **First-time on a new machine:**
 ```bash
 # 1. Install zg CLI (not managed by chezmoi, must install manually)
@@ -21,7 +23,10 @@ curl -fsSL https://github.com/NikkeTryHard/zerogravity/releases/latest/download/
 # 2. Extract refresh token from Antigravity -> accounts.json
 zg extract
 
-# 3. Start proxy
+# 3. Generate docker-compose.yml
+cd ~/github/zerogravity && zg docker-init
+
+# 4. Start proxy
 zg-start
 curl http://localhost:8741/health  # Verify
 ```
@@ -64,16 +69,29 @@ Current models: `opus-4.6` (default), `sonnet-4.6`, `gemini-3-flash` (dev recomm
 
 ## Common `zg` Commands
 
+**Standalone (no proxy needed):**
+
 | Command | Description |
 |---------|-------------|
 | `zg extract` | Extract refresh token from Antigravity |
-| `zg docker-init` | Generate docker-compose.yml |
+| `zg import <file>` | Import accounts from Antigravity Manager export |
 | `zg accounts` | List stored accounts |
-| `zg status` | Version, quota, usage |
+| `zg alias` | List/set/remove model aliases |
+| `zg init` | First-run setup wizard |
+| `zg docker-init` | Generate docker-compose.yml |
+| `zg update` | Update zg binary |
+| `zg status` | Version, accounts, quota, update check |
+
+**Query & diagnostics (proxy must be running):**
+
+| Command | Description |
+|---------|-------------|
+| `zg health` | Health check |
 | `zg test "hi"` | Quick test request |
 | `zg smoke` | Full endpoint smoke test |
-| `zg logs` | View recent logs |
-| `zg update` | Update zg binary |
+| `zg logs [N]` | View last N log lines (default 30) |
+| `zg trace errors` | Show today's error traces |
+| `zg report` | Generate diagnostic report |
 
 ## Token Management
 

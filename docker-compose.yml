@@ -1,14 +1,14 @@
 services:
   zerogravity:
     container_name: zerogravity
-    image: ghcr.io/nikketryhard/zerogravity:latest
+    image: ghcr.io/nikketryhard/zerogravity:v1.3.9
     restart: unless-stopped
     ports:
       - "8741:8741"
       - "443:443"
     volumes:
-      # Mount accounts.json for multi-account rotation
-      - ./accounts.json:/root/.config/zerogravity/accounts.json:ro
+      # Mount accounts.json from system config dir (zg extract writes here)
+      - ~/Library/Application Support/zerogravity/accounts.json:/root/.config/zerogravity/accounts.json:ro
       # Mount aliases.json for custom model aliases
       - ./aliases.json:/root/.config/zerogravity/aliases.json
     environment:

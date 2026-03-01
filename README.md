@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-555?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-333?style=flat-square" alt="License" />
   <img src="https://img.shields.io/badge/API-OpenAI%20%7C%20Anthropic%20%7C%20Gemini-666?style=flat-square" alt="API" />
+  <img src="https://img.shields.io/github/downloads/NikkeTryHard/zerogravity/total?style=flat-square&label=downloads&color=555" alt="Downloads" />
 </p>
 
 <h1 align="center">ZeroGravity</h1>

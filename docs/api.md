@@ -1,5 +1,9 @@
 # API Reference
 
+- **Status**: Active
+- **Last validated**: 2026-02-28
+- **Related docs**: [`README.md`](README.md), [`docker.md`](docker.md), [`zg.md`](zg.md), [`../index.md`](../index.md)
+
 The proxy runs on `http://localhost:8741` by default.
 
 ## Protocol Endpoints
@@ -126,6 +130,14 @@ curl -X POST http://localhost:8741/v1/accounts/set_active \
   -d '{"email": "user@gmail.com"}'
 ```
 
+### Account Status
+
+```bash
+curl http://localhost:8741/v1/accounts/status
+```
+
+Returns per-account details including email, active flag, and quota usage breakdown.
+
 ### Account Rotation
 
 When running with 2+ accounts, the proxy **automatically rotates** to the next account when:
@@ -162,7 +174,7 @@ curl -X POST http://localhost:8741/v1/token \
 curl http://localhost:8741/v1/usage
 ```
 
-Returns token counts for the current session.
+Returns token counts persisted by the proxy, including stats restored across restarts.
 
 ### Quota
 
@@ -179,6 +191,16 @@ curl http://localhost:8741/health
 ```
 
 Returns `200 OK` when the proxy is running.
+
+### Raw Replay
+
+```bash
+curl -X POST http://localhost:8741/v1/replay/raw \
+  -H "Content-Type: application/json" \
+  --data-binary @modified_request.json
+```
+
+Send a pre-built payload (from a trace's `modified_request.json`) directly through the MITM tunnel, bypassing all request translation. Used for latency diagnostics.
 
 ## API Key Protection
 
@@ -225,6 +247,8 @@ curl http://localhost:8741/v1beta/models/gemini-3-flash:generateContent \
 | `POST`     | `/v1/messages`                    | Messages API (Anthropic compat)       |
 | `POST`     | `/v1/messages/count_tokens`       | Anthropic token counting endpoint     |
 | `POST`     | `/v1beta/models/{model}:{action}` | Official Gemini v1beta routes         |
+| `GET`      | `/v1beta/models`                  | List models (Gemini v1beta format)    |
+| `GET`      | `/v1beta/models/{model}`          | Get model info (Gemini v1beta format) |
 | `GET`      | `/v1/models`                      | List available models                 |
 | `GET/POST` | `/v1/search`                      | Web Search via Google grounding (WIP) |
 | `POST`     | `/v1/token`                       | Set OAuth token at runtime            |
@@ -232,9 +256,11 @@ curl http://localhost:8741/v1beta/models/gemini-3-flash:generateContent \
 | `POST`     | `/v1/accounts/set_active`         | Set active account at runtime          |
 | `GET`      | `/v1/accounts`                    | List stored accounts                  |
 | `DELETE`   | `/v1/accounts`                    | Remove account by email               |
+| `GET`      | `/v1/accounts/status`             | Per-account status with quota usage   |
 | `GET`      | `/v1/usage`                       | Proxy token usage                     |
 | `GET`      | `/v1/quota`                       | Quota and rate limits                 |
 | `GET`      | `/v1/images/*`                    | Serve generated images                |
+| `POST`     | `/v1/replay/raw`                  | Send pre-built trace through MITM     |
 | `GET`      | `/health`                         | Health check                          |
 | `GET/POST` | `/`                               | Compatibility root (returns status)   |
 | `POST`     | `/api/event_logging/batch`        | Compatibility event logging endpoint  |

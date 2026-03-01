@@ -1,7 +1,7 @@
 # Docker Guide
 
 - **Status**: Active
-- **Last validated**: 2026-02-26
+- **Last validated**: 2026-02-28
 - **Related docs**: [`README.md`](README.md), [`api.md`](api.md), [`zg.md`](zg.md), [`../index.md`](../index.md)
 
 The proxy runs as a Docker container. The image bundles all required backend components — no Antigravity installation needed on the host.
@@ -123,6 +123,7 @@ docker run -d --name zerogravity \
 | `ZEROGRAVITY_SYSTEM_MODE`     | `stealth` | `stealth` = keep backend prompt; `minimal` = replace entirely            | `minimal`                              |
 | `ZEROGRAVITY_SENSITIVE_WORDS` | built-in  | Comma-separated client names to obfuscate, or `none` to disable          | `Cursor,Windsurf`                      |
 | `ZEROGRAVITY_MODEL_ALIASES`   | —         | Map custom model names to internal models                                | `gpt-4o:gemini-3-flash,gpt-4:opus-4.6` |
+| `ZEROGRAVITY_DISPATCH_HOOKS` | `false`   | Enable dispatch timing diagnostics (1/true/on to enable)                 | `true`                                 |
 
 ### Request Queue
 

@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-555?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-333?style=flat-square" alt="License" />
   <img src="https://img.shields.io/badge/API-OpenAI%20%7C%20Anthropic%20%7C%20Gemini-666?style=flat-square" alt="API" />
+  <img src="https://img.shields.io/github/downloads/NikkeTryHard/zerogravity/total?style=flat-square&label=downloads&color=555" alt="Downloads" />
 </p>
 
 <h1 align="center">ZeroGravity</h1>
@@ -245,9 +246,13 @@ The proxy runs on `http://localhost:8741` by default.
 | `POST /v1/chat/completions`            | OpenAI    | Chat Completions (sync + streaming)                     |
 | `POST /v1/responses`                   | OpenAI    | Responses API (sync + streaming)                        |
 | `POST /v1/messages`                    | Anthropic | Messages API (sync + streaming)                         |
+| `POST /v1/messages/count_tokens`       | Anthropic | Token counting                                          |
+| `GET /v1beta/models`                   | Gemini    | List models (Gemini v1beta format)                      |
+| `GET /v1beta/models/{model}`           | Gemini    | Get model metadata (Gemini v1beta format)               |
 | `POST /v1beta/models/{model}:{action}` | Gemini    | Official Gemini v1beta (recommended — zero translation) |
 | `GET /v1/models`                       | —         | List available models                                   |
 | `GET /v1/images/*`                     | —         | Serve generated images (see below)                      |
+| `GET /health`                          | —         | Health check                                            |
 
 For the full endpoint list (accounts, token, usage, quota, search), see the [API Reference](docs/api.md).
 

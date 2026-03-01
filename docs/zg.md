@@ -1,7 +1,7 @@
 # `zg` CLI Reference
 
 - **Status**: Active
-- **Last validated**: 2026-02-24
+- **Last validated**: 2026-02-28
 - **Related docs**: [`README.md`](README.md), [`docker.md`](docker.md), [`api.md`](api.md), [`../index.md`](../index.md)
 
 `zg` is a standalone CLI tool that works on **any OS** (Linux, macOS, Windows). The proxy itself runs on Linux/Docker only.
@@ -79,11 +79,12 @@ Supported subcommands are exactly: `ls`, `dir`, `errors`.
 
 ### Diagnostics
 
-| Command            | Description                                        |
-| ------------------ | -------------------------------------------------- |
-| `zg report`        | Generate bounded diagnostic snapshot for bug reports |
-| `zg report <id>`   | Bundle a specific trace into a shareable `.tar.gz` |
-| `zg replay <file>` | Re-send a bundled trace to the local proxy         |
+| Command                  | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `zg report`              | Generate bounded diagnostic snapshot for bug reports |
+| `zg report <id>`         | Bundle a specific trace into a shareable `.tar.gz` |
+| `zg replay <file>`       | Re-send a bundled trace to the local proxy         |
+| `zg replay --raw <file>` | Send modified request through MITM bypass (no translation) |
 
 ## Environment Overrides
 
@@ -94,3 +95,4 @@ Supported subcommands are exactly: `ls`, `dir`, `errors`.
 | `ZEROGRAVITY_OS`   | Runtime | Override reported OS label for metadata/header alignment (`Linux`, `macOS`, `Windows`). |
 | `ZEROGRAVITY_IDE_VERSION` | Runtime | Override reported IDE version (preferred over `ZEROGRAVITY_CLIENT_VERSION`). |
 | `ZEROGRAVITY_DEVICE_FINGERPRINT` | Runtime | Override reported device fingerprint (UUID format required). |
+| `ZEROGRAVITY_DISPATCH_HOOKS` | Runtime | Enable dispatch timing diagnostics (values: 1, true, on). |

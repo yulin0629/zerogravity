@@ -111,9 +111,11 @@ docker run -d --name zerogravity \
 | `ZEROGRAVITY_IDE_VERSION`     | Auto-detected           | Preferred override for reported IDE version          | `1.19.4`                    |
 | `ZEROGRAVITY_CLIENT_VERSION`  | Auto-detected           | Override the client version string                   | `1.15.8`                    |
 | `ZEROGRAVITY_DEVICE_FINGERPRINT` | Auto-detected         | Override reported device fingerprint (UUID required) | `11111111-2222-4333-8444-555555555555` |
-| `ZEROGRAVITY_API_BODY_LIMIT_MB` | `32` (clamped `1..100`) | Max request body size in MiB for API routes (`/v1/*`) | `64`                        |
+| `ZEROGRAVITY_API_BODY_LIMIT_MB` | `32` (clamped `1..100`) | Max request body size in MiB for API routes (`/v1/*`) | `64`                       |
 | `SSL_CERT_FILE`               | System default          | Custom CA certificate bundle path                    | `/etc/ssl/certs/ca.pem`     |
 | `RUST_LOG`                    | `warn` (runtime default) / `info` (`zg docker-init` template) | Log level | `debug`                     |
+| `ZEROGRAVITY_DOH`             | `0` (disabled)          | Enable DNS-over-HTTPS via dns.google (`1` to enable)  | `1`                         |
+| `ZEROGRAVITY_STREAM_IDLE_TIMEOUT_SECS` | `120`          | Stream idle timeout in seconds before closing          | `300`                       |
 
 ### Customization
 
@@ -133,7 +135,7 @@ Serializes generation requests to prevent thundering-herd failures when multiple
 | ------------------------------- | -------- | ---------------------------------------------------------- | -------- |
 | `ZEROGRAVITY_QUEUE_ENABLED`     | `true`   | Set to `false`, `0`, or `no` to disable the queue entirely | `false`  |
 | `ZEROGRAVITY_QUEUE_CONCURRENCY` | `2`      | Max concurrent requests to Google                          | `4`      |
-| `ZEROGRAVITY_QUEUE_INTERVAL_MS` | `300`    | Anti-burst gap between consecutive requests (ms)           | `500`    |
+| `ZEROGRAVITY_QUEUE_INTERVAL_MS` | `0`      | Anti-burst gap between consecutive requests (ms)           | `500`    |
 | `ZEROGRAVITY_QUEUE_TIMEOUT_MS`  | `600000` | Max wait time in queue before HTTP 408                     | `300000` |
 | `ZEROGRAVITY_QUEUE_MAX_SIZE`    | `50`     | Max queue depth; excess requests get HTTP 503              | `100`    |
 

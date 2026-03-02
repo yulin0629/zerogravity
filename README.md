@@ -332,7 +332,10 @@ The proxy reads accounts from `accounts.json` in the config directory:
 | `ZEROGRAVITY_SYSTEM_MODE`     | `stealth`     | `stealth` = keep backend prompt, inject user system prompt as override; `minimal` = replace 20KB prompt with minimal identity + user prompt |
 | `ZEROGRAVITY_SENSITIVE_WORDS` | built-in list | Comma-separated client names to obfuscate in requests (zero-width spaces), or `none` to disable                                             |
 | `ZEROGRAVITY_MODEL_ALIASES`   | —             | Map custom model names to built-in models, e.g. `gpt-4o:gemini-3-flash,gpt-4:opus-4.6`. Also configurable via `zg alias` or `aliases.json`  |
-| `ZEROGRAVITY_API_BODY_LIMIT_MB` | `32` (clamped `1..100`) | Max request body size in MiB for API routes (`/v1/*`) | `64` |
+| `ZEROGRAVITY_API_BODY_LIMIT_MB` | `32` (clamped `1..100`) | Max request body size in MiB for API routes (`/v1/*`)                                                                                       |
+| `ZEROGRAVITY_QUOTA_CAP`       | `0.2`         | Per-account quota usage cap (0.0-1.0), triggers rotation. `0` to disable. Also available as `--quota-cap` CLI flag                          |
+| `ZEROGRAVITY_UPSTREAM_PROXY`  | —             | Route all outbound MITM traffic through a proxy (`http://`, `socks5://`, `socks5h://`)                                                      |
+| `ZEROGRAVITY_HTTP_PROXY`      | —             | Pass HTTP/HTTPS proxy settings to the backend child process                                                                                 |
 
 **System prompt mode:** When your client sends a system prompt (e.g. via OpenAI `system` role), ZeroGravity injects it into the request. In `stealth` mode, the backend's identity is stripped and your prompt takes over. In `minimal` mode, the entire 20KB backend prompt is replaced — saves tokens but may trigger rate limiting on Pro models.
 

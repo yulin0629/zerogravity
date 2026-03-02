@@ -265,3 +265,33 @@ curl http://localhost:8741/v1beta/models/gemini-3-flash:generateContent \
 | `GET/POST` | `/`                               | Compatibility root (returns status)   |
 | `POST`     | `/api/event_logging/batch`        | Compatibility event logging endpoint  |
 | `GET/POST` | `/.well-known/{*path}`            | Compatibility well-known endpoint     |
+
+## Behavior Notes
+
+### Default Output Tokens
+
+When a client omits `max_tokens` (Anthropic), `max_completion_tokens` (OpenAI), or `max_output_tokens` (OpenAI Responses), the proxy defaults to **64,000 tokens** -- just below Gemini's 65,536 ceiling. The MITM layer enforces a minimum of 4,096 regardless. This means clients that previously got errors for missing `max_tokens` now receive a sensible default.
+
+### Thinking Budget (Claude Aliases)
+
+Claude aliases (`opus-4.6`, `sonnet-4.6`) are backed by Gemini models. When clients send `budget_tokens` via the Anthropic Messages API, the proxy maps it to Gemini thinking levels:
+
+| budget_tokens | Gemini thinkingLevel |
+|---------------|---------------------|
+| 0             | disabled            |
+| 1 -- 512      | minimal             |
+| 513 -- 1024   | low                 |
+| 1025 -- 4096  | medium              |
+| 4097+         | high                |
+
+Raw integer budgets cause 400 INVALID_ARGUMENT on Gemini 3+ models. The proxy handles this automatically.
+
+### Tool Calling
+
+OpenAI and Anthropic tool/function declarations are translated to Gemini's format. During translation:
+- **Constraint hints** (`minLength`, `maxLength`, `pattern`, `format`, `default`, `examples`) are preserved as description text since Gemini strips these JSON Schema keys
+- **Nullable properties** are removed from `required` arrays
+- **Union types** (e.g. `["string", "array"]`) produce "Accepts: string | array" description hints
+- **Non-standard keys** (`strict`, `x-*` prefixed, etc.) are stripped before sending to Gemini
+
+Gemini-native tool declarations (via `/v1beta/`) pass through with zero translation.

@@ -1,7 +1,7 @@
 services:
   zerogravity:
     container_name: zerogravity
-    image: ghcr.io/nikketryhard/zerogravity:v1.3.10
+    image: ghcr.io/nikketryhard/zerogravity:v1.3.13
     restart: unless-stopped
     ports:
       - "8741:8741"
